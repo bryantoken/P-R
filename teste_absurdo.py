@@ -67,7 +67,7 @@ if 'logged_in' not in st.session_state:
 
 if is_admin_page:
     # Painel de login só será exibido na rota /admin
-    if st.session_state.show_login_panel:
+    if not st.session_state.logged_in:
         with st.sidebar:
             st.header("Login de Administrador")
             login = st.text_input("Login", type="password")
@@ -75,14 +75,12 @@ if is_admin_page:
             if st.button("Login"):
                 if autenticar_usuario(login, senha):
                     st.session_state.logged_in = True
-                    st.session_state.show_login_panel = False  # Fechar o painel após login bem-sucedido
                     st.success("Login bem-sucedido!")
                 else:
                     st.session_state.logged_in = False
                     st.error("Login ou senha incorretos!")
-
-    # Exibir título e opções da página de admin
-    if st.session_state.logged_in:
+    else:
+        # Exibir título e opções da página de admin
         st.title("Admin - Respostas de Interesse em Seguros")
 
         # Exibir respostas como tabela
