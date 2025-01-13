@@ -1,6 +1,7 @@
 import streamlit as st
 import sqlite3
-from urllib.parse import parse_qs
+import pandas as pd
+from io import BytesIO
 
 # Configuração do Banco de Dados SQLite
 def init_db():
@@ -28,15 +29,83 @@ def save_response(cliente, pergunta, resposta, assessor):
     conn.commit()
     conn.close()
 
+# Função para autenticar o login
+def autenticar_usuario(login, senha):
+    return login == "goldenbi" and senha == "GOLD22lock"
+
+# Função para gerar o arquivo Excel
+def gerar_excel():
+    conn = sqlite3.connect("respostas.db")
+    query = "SELECT cliente, pergunta, resposta, assessor FROM respostas"
+    df = pd.read_sql(query, conn)
+    conn.close()
+
+    # Gerar o arquivo Excel em memória usando openpyxl
+    excel_buffer = BytesIO()
+    with pd.ExcelWriter(excel_buffer, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Respostas")
+    excel_buffer.seek(0)
+    return excel_buffer
+
 # Inicializar o banco de dados
 init_db()
 
-# Capturar os parâmetros da URL
-query_params = st.experimental_get_query_params()
-assessor = query_params.get("assessor", ["Desconhecido"])[0]  # Nome do parâmetro deve ser "assessor"
+# Capturar os parâmetros da URL (atualizado)
+query_params = st.query_params
+assessor = query_params.get("assessor", ["Desconhecido"])[0]
 
+# Colocar o botão de login no canto superior esquerdo
+if st.button("Admin", key="login_panel_button"):
+    st.session_state.show_login_panel = True
+
+# Painel de login (inicialmente oculto)
+if 'show_login_panel' in st.session_state and st.session_state.show_login_panel:
+    with st.sidebar:
+        st.header("Login de Administrador")
+        login = st.text_input("Login", type="password")
+        senha = st.text_input("Senha", type="password")
+        if st.button("Login"):
+            if autenticar_usuario(login, senha):
+                st.session_state.logged_in = True
+                st.session_state.show_login_panel = False  # Fechar o painel após login bem-sucedido
+                st.success("Login bem-sucedido!")
+            else:
+                st.session_state.logged_in = False
+                st.error("Login ou senha incorretos!")
+
+# Exibir título
 st.title("Formulário de Interesse em Seguros")
 st.write(f"Assessor responsável: {assessor}")
+
+# Verificar se o usuário já fez login
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
+
+# Verificar se o usuário está logado
+if st.session_state.logged_in:
+    # Exibir respostas como tabela
+    conn = sqlite3.connect("respostas.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM respostas")
+    dados = cursor.fetchall()
+    conn.close()
+
+    # Criar um DataFrame com as respostas
+    df_respostas = pd.DataFrame(dados, columns=["ID", "Cliente", "Pergunta", "Resposta", "Assessor"])
+
+    # Exibir a tabela de respostas no site
+    st.dataframe(df_respostas)
+
+    # Gerar o arquivo Excel
+    excel_buffer = gerar_excel()
+
+    # Oferecer o download do arquivo Excel
+    st.download_button(
+        label="Baixar Respostas em Excel",
+        data=excel_buffer,
+        file_name="respostas.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 # Formulário
 with st.form("formulario"):
@@ -51,15 +120,3 @@ if submit:
         st.success("Resposta enviada com sucesso!")
     else:
         st.error("Por favor, insira seu nome.")
-
-# Exibir respostas (opcional, apenas para admin)
-if st.checkbox("Mostrar respostas (apenas para administradores)"):
-    conn = sqlite3.connect("respostas.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM respostas")
-    dados = cursor.fetchall()
-    conn.close()
-
-    st.write("### Respostas Coletadas")
-    for row in dados:
-        st.write(f"Cliente: {row[1]}, Pergunta: {row[2]}, Resposta: {row[3]}, Assessor: {row[4]}")
