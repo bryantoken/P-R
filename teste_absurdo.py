@@ -51,7 +51,7 @@ def gerar_excel():
 init_db()
 
 # Capturar os parâmetros da URL (atualizado)
-query_params = st.query_params
+query_params = st.experimental_get_query_params()
 assessor = query_params.get("assessor", ["Desconhecido"])[0]
 is_admin_page = query_params.get("page", [""])[0] == "admin"
 
@@ -105,7 +105,6 @@ if is_admin_page:
             file_name="respostas.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-
 else:
     # Formulário de cliente em outras páginas
     st.title("Formulário de Interesse em Seguros")
