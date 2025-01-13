@@ -1,7 +1,6 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
-from io import BytesIO
 
 # Configuração do Banco de Dados SQLite
 def init_db():
@@ -32,20 +31,6 @@ def save_response(cliente, pergunta, resposta, assessor):
 # Função para autenticar o login
 def autenticar_usuario(login, senha):
     return login == "goldenbi" and senha == "GOLD22lock"
-
-# Função para gerar o arquivo Excel
-def gerar_excel():
-    conn = sqlite3.connect("respostas.db")
-    query = "SELECT cliente, pergunta, resposta, assessor FROM respostas"
-    df = pd.read_sql(query, conn)
-    conn.close()
-
-    # Gerar o arquivo Excel em memória usando openpyxl
-    excel_buffer = BytesIO()
-    with pd.ExcelWriter(excel_buffer, engine="openpyxl") as writer:
-        df.to_excel(writer, index=False, sheet_name="Respostas")
-    excel_buffer.seek(0)
-    return excel_buffer
 
 # Inicializar o banco de dados
 init_db()
@@ -95,17 +80,6 @@ if is_admin_page:
 
         # Exibir a tabela de respostas no site
         st.dataframe(df_respostas)
-
-        # Gerar o arquivo Excel
-        excel_buffer = gerar_excel()
-
-        # Oferecer o download do arquivo Excel
-        st.download_button(
-            label="Baixar Respostas em Excel",
-            data=excel_buffer,
-            file_name="respostas.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
 else:
     # Formulário de cliente em outras páginas
     st.title("Formulário de Interesse em Seguros")
