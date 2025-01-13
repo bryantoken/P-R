@@ -53,70 +53,74 @@ init_db()
 # Capturar os parâmetros da URL (atualizado)
 query_params = st.query_params
 assessor = query_params.get("assessor", ["Desconhecido"])[0]
+is_admin_page = query_params.get("page", [""])[0] == "admin"
 
-# Colocar o botão de login no canto superior esquerdo
-if st.button("Admin", key="login_panel_button"):
-    st.session_state.show_login_panel = True
+# Exibir o banner no topo
+st.image("background.jpeg", use_column_width=True)
 
 # Painel de login (inicialmente oculto)
-if 'show_login_panel' in st.session_state and st.session_state.show_login_panel:
-    with st.sidebar:
-        st.header("Login de Administrador")
-        login = st.text_input("Login", type="password")
-        senha = st.text_input("Senha", type="password")
-        if st.button("Login"):
-            if autenticar_usuario(login, senha):
-                st.session_state.logged_in = True
-                st.session_state.show_login_panel = False  # Fechar o painel após login bem-sucedido
-                st.success("Login bem-sucedido!")
-            else:
-                st.session_state.logged_in = False
-                st.error("Login ou senha incorretos!")
+if 'show_login_panel' not in st.session_state:
+    st.session_state.show_login_panel = False
 
-# Exibir título
-st.title("Formulário de Interesse em Seguros")
-st.write(f"Assessor responsável: {assessor}")
+if is_admin_page:
+    # Painel de login só será exibido na rota /admin
+    if st.session_state.show_login_panel:
+        with st.sidebar:
+            st.header("Login de Administrador")
+            login = st.text_input("Login", type="password")
+            senha = st.text_input("Senha", type="password")
+            if st.button("Login"):
+                if autenticar_usuario(login, senha):
+                    st.session_state.logged_in = True
+                    st.session_state.show_login_panel = False  # Fechar o painel após login bem-sucedido
+                    st.success("Login bem-sucedido!")
+                else:
+                    st.session_state.logged_in = False
+                    st.error("Login ou senha incorretos!")
 
-# Verificar se o usuário já fez login
-if 'logged_in' not in st.session_state:
-    st.session_state.logged_in = False
+    # Exibir título e opções da página de admin
+    if st.session_state.logged_in:
+        st.title("Admin - Respostas de Interesse em Seguros")
 
-# Verificar se o usuário está logado
-if st.session_state.logged_in:
-    # Exibir respostas como tabela
-    conn = sqlite3.connect("respostas.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM respostas")
-    dados = cursor.fetchall()
-    conn.close()
+        # Exibir respostas como tabela
+        conn = sqlite3.connect("respostas.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM respostas")
+        dados = cursor.fetchall()
+        conn.close()
 
-    # Criar um DataFrame com as respostas
-    df_respostas = pd.DataFrame(dados, columns=["ID", "Cliente", "Pergunta", "Resposta", "Assessor"])
+        # Criar um DataFrame com as respostas
+        df_respostas = pd.DataFrame(dados, columns=["ID", "Cliente", "Pergunta", "Resposta", "Assessor"])
 
-    # Exibir a tabela de respostas no site
-    st.dataframe(df_respostas)
+        # Exibir a tabela de respostas no site
+        st.dataframe(df_respostas)
 
-    # Gerar o arquivo Excel
-    excel_buffer = gerar_excel()
+        # Gerar o arquivo Excel
+        excel_buffer = gerar_excel()
 
-    # Oferecer o download do arquivo Excel
-    st.download_button(
-        label="Baixar Respostas em Excel",
-        data=excel_buffer,
-        file_name="respostas.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+        # Oferecer o download do arquivo Excel
+        st.download_button(
+            label="Baixar Respostas em Excel",
+            data=excel_buffer,
+            file_name="respostas.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
 
-# Formulário
-with st.form("formulario"):
-    cliente = st.text_input("Seu nome (cliente):")
-    pergunta = "Você pretende fechar seguro nos próximos 2 anos?"
-    resposta = st.radio(pergunta, ["Sim", "Não"])
-    submit = st.form_submit_button("Enviar")
+else:
+    # Formulário de cliente em outras páginas
+    st.title("Formulário de Interesse em Seguros")
+    st.write(f"Assessor responsável: {assessor}")
 
-if submit:
-    if cliente.strip():
-        save_response(cliente, pergunta, resposta, assessor)
-        st.success("Resposta enviada com sucesso!")
-    else:
-        st.error("Por favor, insira seu nome.")
+    # Formulário
+    with st.form("formulario"):
+        cliente = st.text_input("Seu nome (cliente):")
+        pergunta = "Você pretende fechar seguro nos próximos 2 anos?"
+        resposta = st.radio(pergunta, ["Sim", "Não"])
+        submit = st.form_submit_button("Enviar")
+
+    if submit:
+        if cliente.strip():
+            save_response(cliente, pergunta, resposta, assessor)
+            st.success("Resposta enviada com sucesso!")
+        else:
+            st.error("Por favor, insira seu nome.")
