@@ -31,8 +31,12 @@ def save_response(cliente, pergunta, resposta, assessor):
 # Inicializar o banco de dados
 init_db()
 
-# Obtendo os parâmetros da URL
-query_params = st.experimental_get_query_params()
+# Obtendo os parâmetros da URL (substituindo o método depreciado)
+query_params = st.session_state.get("query_params", None)
+if query_params is None:
+    st.session_state["query_params"] = st.experimental_get_query_params()
+    query_params = st.session_state["query_params"]
+
 assessor = query_params.get("Assessor", ["Desconhecido"])[0]
 
 st.title("Formulário de Interesse em Seguros")
