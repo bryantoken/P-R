@@ -62,6 +62,9 @@ st.image("background.jpeg", use_column_width=True)
 if 'show_login_panel' not in st.session_state:
     st.session_state.show_login_panel = False
 
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False  # Inicializando a chave 'logged_in'
+
 if is_admin_page:
     # Painel de login só será exibido na rota /admin
     if st.session_state.show_login_panel:
