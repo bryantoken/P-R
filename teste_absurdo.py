@@ -36,7 +36,7 @@ def autenticar_usuario(login, senha):
 init_db()
 
 # Capturar os parâmetros da URL
-query_params = st.query_params.get_all()
+query_params = st.query_params
 assessor = query_params.get("assessor", ["Desconhecido"])[0]
 is_admin_page = query_params.get("page", [""])[0] == "admin"
 
