@@ -34,15 +34,16 @@ def autenticar_usuario(login, senha):
 
 # Inicializar o banco de dados
 init_db()
+#############################
+query_params = st.query_params  # `st.query_params` já retorna um dicionário
 
-# Capturar os parâmetros da URL
-query_params = st.query_params
+# Obter o valor de "assessor" com um valor padrão
+assessor = query_params.get("assessor", ["Desconhecido"])[0]
 
-# Obter o valor completo de "assessor" como string e tratar corretamente
-assessor = " ".join(query_params.get("assessor", ["Desconhecido"])).replace("%20").strip()
-
-# Verificar se a página é "admin" sem adicionar espaços extras
+# Verificar se a página é "admin"
 is_admin_page = query_params.get("page", [""])[0] == "admin"
+
+#############################
 
 # Exibir o banner no topo
 st.image("background.jpeg", use_container_width=True)
