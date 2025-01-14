@@ -36,14 +36,8 @@ def autenticar_usuario(login, senha):
 # Inicializar o banco de dados
 init_db()
 
-# Capturar os parâmetros da URL
-query_params = st.query_params["assessor"]  # `st.query_params` já retorna um dicionário
-
 # Obter o valor de "assessor" entre aspas
-assessor = query_params.get("assessor", ["Desconhecido"])[0]
-match = re.match(r'"(.*?)"', assessor)  # Extrai tudo que está entre aspas
-if match:
-    assessor = match.group(1)  # Extrai o nome entre aspas
+assessor = st.query_params["assessor"] if "assessor" in st.query_params else "Desconhecido"
 
 # Exibir o banner no topo
 st.image("background.jpeg", use_container_width=True)
