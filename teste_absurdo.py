@@ -2,11 +2,6 @@ import streamlit as st
 import sqlite3
 import pandas as pd
 
-
-# Ocultar avisos de depreciação
-st.set_option('client.showWarningOnDirectExecution', False)
-st.set_option('deprecation.showdeprecated', False)
-
 # Configuração do Banco de Dados SQLite
 def init_db():
     conn = sqlite3.connect("respostas.db")
@@ -41,7 +36,7 @@ def autenticar_usuario(login, senha):
 init_db()
 
 # Capturar os parâmetros da URL
-query_params = st.experimental_get_query_params()  # Atualizado
+query_params = st.query_params()  # Atualizado
 assessor = query_params.get("assessor", ["Desconhecido"])[0]
 is_admin_page = query_params.get("page", [""])[0] == "admin"
 
