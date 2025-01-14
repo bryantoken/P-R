@@ -36,11 +36,12 @@ def autenticar_usuario(login, senha):
 init_db()
 
 # Capturar os parâmetros da URL
-query_params = st.query_params  # Atualizado
-assessor_raw = query_params.get("assessor", ["Desconhecido"])[0]
-# Limpar espaços adicionais no nome do assessor
-assessor = "".join(assessor_raw.split())  # Remove espaços extras
+query_params = st.experimental_get_query_params()  # Atualizado
+assessor = query_params.get("assessor", ["Desconhecido"])[0]
 is_admin_page = query_params.get("page", [""])[0] == "admin"
+
+# Limpar espaços extras no nome do assessor
+assessor = assessor.replace("%20", " ").strip()
 
 # Exibir o banner no topo
 st.image("background.jpeg", use_container_width=True)
@@ -51,10 +52,10 @@ if 'logged_in' not in st.session_state:
 
 if is_admin_page:
     # Painel de login na rota /admin
+    st.sidebar.header("Login de Administrador")
     if not st.session_state.logged_in:
-        st.sidebar.header("Login de Administrador")
-        login = st.sidebar.text_input("Login")
-        senha = st.sidebar.text_input("Senha", type="password")
+        login = st.sidebar.text_input("Login", placeholder="Digite seu login")
+        senha = st.sidebar.text_input("Senha", type="password", placeholder="Digite sua senha")
         if st.sidebar.button("Login"):
             if autenticar_usuario(login, senha):
                 st.session_state.logged_in = True
