@@ -3,10 +3,9 @@ import sqlite3
 import pandas as pd
 
 
-st.set_option('deprecation.showfileUploaderEncoding', False)
-st.set_option('deprecation.showWarningOnDirectExecution', False)
-st.set_option('deprecation.showdeprecated', False)  # Ocultar avisos de depreciação
-
+# Ocultar avisos de depreciação
+st.set_option('client.showWarningOnDirectExecution', False)
+st.set_option('deprecation.showdeprecated', False)
 
 # Configuração do Banco de Dados SQLite
 def init_db():
