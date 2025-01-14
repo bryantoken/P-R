@@ -51,7 +51,7 @@ st.image("background.jpeg", use_container_width=True)
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False  # Inicializando a chave 'logged_in'
 
-# Exibir painel de login do admin na sidebar
+# Mostrar painel de login apenas se o usuário abrir a sidebar
 if not st.session_state.logged_in:
     with st.sidebar:
         st.header("Login de Administrador")
