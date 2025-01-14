@@ -38,9 +38,6 @@ init_db()
 # Obter o valor de "assessor"
 assessor = st.query_params["assessor"] if "assessor" in st.query_params else "Desconhecido"
 
-# Exibir o banner no topo
-st.image("background.jpeg", use_container_width=True)
-
 # Verificar se o assessor é "admin", caso contrário, a sidebar não será exibida
 if assessor == "admin":
     st.session_state.sidebar_open = True
@@ -51,8 +48,8 @@ else:
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
-# Mostrar painel de login apenas se o usuário abrir a sidebar
-if st.session_state.get("sidebar_open", False):
+# Se o assessor for "admin", exibir somente o painel de controle (tabela)
+if assessor == "admin" and st.session_state.get("sidebar_open", False):
     with st.sidebar:
         # Login
         if not st.session_state.logged_in:
@@ -69,8 +66,8 @@ if st.session_state.get("sidebar_open", False):
             # Exibir título e opções da página de admin
             st.sidebar.success("Você está logado como administrador!")
 
-            # Exibir respostas como tabela
-            st.title("Admin - Respostas de Interesse em Seguros")
+            # Exibir título e tabela de respostas
+            st.title("Administrador - Controle")
 
             conn = sqlite3.connect("respostas.db")
             cursor = conn.cursor()
@@ -84,21 +81,25 @@ if st.session_state.get("sidebar_open", False):
             # Exibir a tabela de respostas no site
             st.dataframe(df_respostas)
 
-# Formulário de cliente em outras páginas
-st.title("Formulário de Interesse em Seguros")
-st.write(f"Assessor responsável: {assessor}")
+# Caso contrário (quando não for admin), exibir o formulário e imagem
+else:
+    # Exibir o banner no topo
+    st.image("background.jpeg", use_container_width=True)
 
-# Formulário
-with st.form("formulario"):
-    cliente = st.text_input("Seu nome (cliente):")
-    pergunta = "Você pretende fechar seguro nos próximos 2 anos?"
-    resposta = st.radio(pergunta, ["Sim", "Não"])
-    submit = st.form_submit_button("Enviar")
+    st.title("Formulário de Interesse em Seguros")
+    st.write(f"Assessor responsável: {assessor}")
 
-if submit:
-    if cliente.strip():
-        # Salvar no banco com o nome do assessor
-        save_response(cliente, pergunta, resposta, assessor)
-        st.success("Resposta enviada com sucesso!")
-    else:
-        st.error("Por favor, insira seu nome.")
+    # Formulário
+    with st.form("formulario"):
+        cliente = st.text_input("Seu nome (cliente):")
+        pergunta = "Você pretende fechar seguro nos próximos 2 anos?"
+        resposta = st.radio(pergunta, ["Sim", "Não"])
+        submit = st.form_submit_button("Enviar")
+
+    if submit:
+        if cliente.strip():
+            # Salvar no banco com o nome do assessor
+            save_response(cliente, pergunta, resposta, assessor)
+            st.success("Resposta enviada com sucesso!")
+        else:
+            st.error("Por favor, insira seu nome.")
