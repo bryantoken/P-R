@@ -41,7 +41,7 @@ query_params = st.query_params  # `st.query_params` já retorna um dicionário
 
 # Obter o valor de "assessor" entre aspas
 assessor = query_params.get("assessor", ["Desconhecido"])[0]
-match = re.match(r'"(.*?)"', assessor)
+match = re.match(r'"(.*?)"', assessor)  # Extrai tudo que está entre aspas
 if match:
     assessor = match.group(1)  # Extrai o nome entre aspas
 
@@ -52,9 +52,13 @@ st.image("background.jpeg", use_container_width=True)
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False  # Inicializando a chave 'logged_in'
 
-# Criar um botão para abrir a sidebar apenas quando clicado
-if st.button("Configurações", key="open_sidebar_button"):
-    st.session_state.sidebar_open = True
+# Criar o layout com a coluna esquerda para o botão
+col1, col2 = st.columns([1, 4])  # Dividindo a página em 2 colunas, sendo a primeira mais estreita
+
+with col1:
+    # Criar um botão para abrir a sidebar apenas quando clicado
+    if st.button("Configurações", key="open_sidebar_button"):
+        st.session_state.sidebar_open = True
 
 # Mostrar painel de login apenas se o usuário abrir a sidebar
 if st.session_state.get("sidebar_open", False):
