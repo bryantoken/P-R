@@ -41,12 +41,19 @@ query_params = st.query_params  # `st.query_params` já retorna um dicionário
 # Obter o valor de "assessor" com um valor padrão e corrigir para nome completo
 assessor = " ".join(query_params.get("assessor", ["Desconhecido"])).replace("%20", " ").strip()
 
+# Remover os espaços extras do nome do assessor (tanto para exibição quanto para o banco)
+assessor_clean = assessor.replace(" ", "")
+
 # Exibir o banner no topo
 st.image("background.jpeg", use_container_width=True)
 
 # Verificar se o usuário está logado (se a chave 'logged_in' está no session state)
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False  # Inicializando a chave 'logged_in'
+
+# Criar um botão para abrir a sidebar
+with st.sidebar:
+    st.button("Abrir Sidebar", key="open_sidebar")
 
 # Mostrar painel de login apenas se o usuário abrir a sidebar
 if not st.session_state.logged_in:
@@ -92,7 +99,8 @@ with st.form("formulario"):
 
 if submit:
     if cliente.strip():
-        save_response(cliente, pergunta, resposta, assessor)
+        # Salvar no banco com o nome do assessor limpo
+        save_response(cliente, pergunta, resposta, assessor_clean)
         st.success("Resposta enviada com sucesso!")
     else:
         st.error("Por favor, insira seu nome.")
