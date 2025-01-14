@@ -28,10 +28,6 @@ def save_response(cliente, pergunta, resposta, assessor):
     conn.commit()
     conn.close()
 
-# Função para autenticar o login
-def autenticar_usuario(login, senha):
-    return login == "goldenbi" and senha == "GOLD22lock"
-
 # Inicializar o banco de dados
 init_db()
 
