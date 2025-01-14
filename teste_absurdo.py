@@ -1,6 +1,7 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
+import re  # Para facilitar a extração do nome entre aspas
 
 # Configuração do Banco de Dados SQLite
 def init_db():
@@ -38,8 +39,11 @@ init_db()
 # Capturar os parâmetros da URL
 query_params = st.query_params  # `st.query_params` já retorna um dicionário
 
-# Obter o valor de "assessor" diretamente da URL, sem qualquer manipulação de espaços
+# Obter o valor de "assessor" entre aspas
 assessor = query_params.get("assessor", ["Desconhecido"])[0]
+match = re.match(r'"(.*?)"', assessor)
+if match:
+    assessor = match.group(1)  # Extrai o nome entre aspas
 
 # Exibir o banner no topo
 st.image("background.jpeg", use_container_width=True)
@@ -48,40 +52,42 @@ st.image("background.jpeg", use_container_width=True)
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False  # Inicializando a chave 'logged_in'
 
-# Criar um botão para abrir a sidebar
-with st.sidebar:
-    st.button("Abrir Sidebar", key="open_sidebar")
+# Criar um botão para abrir a sidebar apenas quando clicado
+if st.button("Configurações", key="open_sidebar_button"):
+    st.session_state.sidebar_open = True
 
 # Mostrar painel de login apenas se o usuário abrir a sidebar
-if not st.session_state.logged_in:
+if st.session_state.get("sidebar_open", False):
     with st.sidebar:
-        st.header("Login de Administrador")
-        login = st.text_input("Login", placeholder="Digite seu login")
-        senha = st.text_input("Senha", type="password", placeholder="Digite sua senha")
-        if st.button("Login"):
-            if autenticar_usuario(login, senha):
-                st.session_state.logged_in = True
-                st.sidebar.success("Login bem-sucedido!")
-            else:
-                st.sidebar.error("Login ou senha incorretos!")
-else:
-    # Exibir título e opções da página de admin
-    st.sidebar.success("Você está logado como administrador!")
+        # Login
+        if not st.session_state.logged_in:
+            st.header("Login de Administrador")
+            login = st.text_input("Login", placeholder="Digite seu login")
+            senha = st.text_input("Senha", type="password", placeholder="Digite sua senha")
+            if st.button("Login"):
+                if autenticar_usuario(login, senha):
+                    st.session_state.logged_in = True
+                    st.sidebar.success("Login bem-sucedido!")
+                else:
+                    st.sidebar.error("Login ou senha incorretos!")
+        else:
+            # Exibir título e opções da página de admin
+            st.sidebar.success("Você está logado como administrador!")
 
-    # Exibir respostas como tabela
-    st.title("Admin - Respostas de Interesse em Seguros")
+            # Exibir respostas como tabela
+            st.title("Admin - Respostas de Interesse em Seguros")
 
-    conn = sqlite3.connect("respostas.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM respostas")
-    dados = cursor.fetchall()
-    conn.close()
+            conn = sqlite3.connect("respostas.db")
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM respostas")
+            dados = cursor.fetchall()
+            conn.close()
 
-    # Criar um DataFrame com as respostas
-    df_respostas = pd.DataFrame(dados, columns=["ID", "Cliente", "Pergunta", "Resposta", "Assessor"])
+            # Criar um DataFrame com as respostas
+            df_respostas = pd.DataFrame(dados, columns=["ID", "Cliente", "Pergunta", "Resposta", "Assessor"])
 
-    # Exibir a tabela de respostas no site
-    st.dataframe(df_respostas)
+            # Exibir a tabela de respostas no site
+            st.dataframe(df_respostas)
 
 # Formulário de cliente em outras páginas
 st.title("Formulário de Interesse em Seguros")
@@ -96,7 +102,7 @@ with st.form("formulario"):
 
 if submit:
     if cliente.strip():
-        # Salvar no banco com o nome do assessor sem manipulação
+        # Salvar no banco com o nome do assessor limpo
         save_response(cliente, pergunta, resposta, assessor)
         st.success("Resposta enviada com sucesso!")
     else:
