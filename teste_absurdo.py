@@ -38,11 +38,8 @@ init_db()
 # Capturar os parâmetros da URL
 query_params = st.query_params  # `st.query_params` já retorna um dicionário
 
-# Obter o valor de "assessor" com um valor padrão e corrigir para nome completo
-assessor = " ".join(query_params.get("assessor", ["Desconhecido"])).replace("%20", " ").strip()
-
-# Remover os espaços extras do nome do assessor (tanto para exibição quanto para o banco)
-assessor_clean = assessor.replace(" ", "")
+# Obter o valor de "assessor" diretamente da URL, sem qualquer manipulação de espaços
+assessor = query_params.get("assessor", ["Desconhecido"])[0]
 
 # Exibir o banner no topo
 st.image("background.jpeg", use_container_width=True)
@@ -99,8 +96,8 @@ with st.form("formulario"):
 
 if submit:
     if cliente.strip():
-        # Salvar no banco com o nome do assessor limpo
-        save_response(cliente, pergunta, resposta, assessor_clean)
+        # Salvar no banco com o nome do assessor sem manipulação
+        save_response(cliente, pergunta, resposta, assessor)
         st.success("Resposta enviada com sucesso!")
     else:
         st.error("Por favor, insira seu nome.")
