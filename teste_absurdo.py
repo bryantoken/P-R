@@ -38,16 +38,13 @@ init_db()
 # Capturar os parâmetros da URL
 query_params = st.query_params  # `st.query_params` já retorna um dicionário
 
-# Obter o valor de "assessor" com um valor padrão
-assessor = query_params.get("assessor", ["Desconhecido"])[0]
-
-# Definir se o painel de admin está acessível (login)
-is_admin_page = False  # Agora a página de admin não será uma rota, mas estará acessível via sidebar
+# Obter o valor de "assessor" com um valor padrão e corrigir para nome completo
+assessor = " ".join(query_params.get("assessor", ["Desconhecido"])).replace("%20", " ").strip()
 
 # Exibir o banner no topo
 st.image("background.jpeg", use_container_width=True)
 
-# Painel de login (inicialmente oculto)
+# Verificar se o usuário está logado (se a chave 'logged_in' está no session state)
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False  # Inicializando a chave 'logged_in'
 
