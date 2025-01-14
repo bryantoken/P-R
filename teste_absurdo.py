@@ -38,14 +38,11 @@ init_db()
 # Capturar os parâmetros da URL
 query_params = st.query_params
 
-# Obter o valor completo de "assessor" como string
-assessor = " ".join(query_params.get("assessor", ["Desconhecido"]))
+# Obter o valor completo de "assessor" como string e tratar corretamente
+assessor = " ".join(query_params.get("assessor", ["Desconhecido"])).replace("%20", " ").strip()
 
-# Verificar se a página é "admin"
-is_admin_page = " ".join(query_params.get("page", [""])) == "admin"
-
-# Limpar espaços extras no nome do assessor
-assessor = assessor.replace("%20", " ").strip()
+# Verificar se a página é "admin" sem adicionar espaços extras
+is_admin_page = query_params.get("page", [""])[0] == "admin"
 
 # Exibir o banner no topo
 st.image("background.jpeg", use_container_width=True)
