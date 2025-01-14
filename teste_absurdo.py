@@ -35,36 +35,32 @@ def autenticar_usuario(login, senha):
 # Inicializar o banco de dados
 init_db()
 
-# Capturar os parâmetros da URL (atualizado)
-query_params = st.query_params  # Substituído
-# Decodificar o nome completo do assessor
-assessor = " ".join(query_params.get("assessor", ["Desconhecido"]))  # Corrigido para capturar o nome completo
+# Capturar os parâmetros da URL
+query_params = st.query_params  # Atualizado
+assessor_raw = query_params.get("assessor", ["Desconhecido"])[0]
+# Limpar espaços adicionais no nome do assessor
+assessor = "".join(assessor_raw.split())  # Remove espaços extras
 is_admin_page = query_params.get("page", [""])[0] == "admin"
 
 # Exibir o banner no topo
 st.image("background.jpeg", use_container_width=True)
 
 # Painel de login (inicialmente oculto)
-if 'show_login_panel' not in st.session_state:
-    st.session_state.show_login_panel = False
-
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False  # Inicializando a chave 'logged_in'
 
 if is_admin_page:
-    # Painel de login só será exibido na rota /admin
+    # Painel de login na rota /admin
     if not st.session_state.logged_in:
-        with st.sidebar:
-            st.header("Login de Administrador")
-            login = st.text_input("Login", type="password")
-            senha = st.text_input("Senha", type="password")
-            if st.button("Login"):
-                if autenticar_usuario(login, senha):
-                    st.session_state.logged_in = True
-                    st.success("Login bem-sucedido!")
-                else:
-                    st.session_state.logged_in = False
-                    st.error("Login ou senha incorretos!")
+        st.sidebar.header("Login de Administrador")
+        login = st.sidebar.text_input("Login")
+        senha = st.sidebar.text_input("Senha", type="password")
+        if st.sidebar.button("Login"):
+            if autenticar_usuario(login, senha):
+                st.session_state.logged_in = True
+                st.sidebar.success("Login bem-sucedido!")
+            else:
+                st.sidebar.error("Login ou senha incorretos!")
     else:
         # Exibir título e opções da página de admin
         st.title("Admin - Respostas de Interesse em Seguros")
