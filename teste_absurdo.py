@@ -34,16 +34,15 @@ def autenticar_usuario(login, senha):
 
 # Inicializar o banco de dados
 init_db()
-#############################
+
+# Capturar os parâmetros da URL
 query_params = st.query_params  # `st.query_params` já retorna um dicionário
 
 # Obter o valor de "assessor" com um valor padrão
 assessor = query_params.get("assessor", ["Desconhecido"])[0]
 
-# Verificar se a página é "admin"
-is_admin_page = query_params.get("page", [""])[0] == "admin"
-
-#############################
+# Definir se o painel de admin está acessível (login)
+is_admin_page = False  # Agora a página de admin não será uma rota, mas estará acessível via sidebar
 
 # Exibir o banner no topo
 st.image("background.jpeg", use_container_width=True)
@@ -52,49 +51,51 @@ st.image("background.jpeg", use_container_width=True)
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False  # Inicializando a chave 'logged_in'
 
-if is_admin_page:
-    # Painel de login na rota /admin
-    st.sidebar.header("Login de Administrador")
-    if not st.session_state.logged_in:
-        login = st.sidebar.text_input("Login", placeholder="Digite seu login")
-        senha = st.sidebar.text_input("Senha", type="password", placeholder="Digite sua senha")
-        if st.sidebar.button("Login"):
+# Exibir painel de login do admin na sidebar
+if not st.session_state.logged_in:
+    with st.sidebar:
+        st.header("Login de Administrador")
+        login = st.text_input("Login", placeholder="Digite seu login")
+        senha = st.text_input("Senha", type="password", placeholder="Digite sua senha")
+        if st.button("Login"):
             if autenticar_usuario(login, senha):
                 st.session_state.logged_in = True
                 st.sidebar.success("Login bem-sucedido!")
             else:
                 st.sidebar.error("Login ou senha incorretos!")
-    else:
-        # Exibir título e opções da página de admin
-        st.title("Admin - Respostas de Interesse em Seguros")
-
-        # Exibir respostas como tabela
-        conn = sqlite3.connect("respostas.db")
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM respostas")
-        dados = cursor.fetchall()
-        conn.close()
-
-        # Criar um DataFrame com as respostas
-        df_respostas = pd.DataFrame(dados, columns=["ID", "Cliente", "Pergunta", "Resposta", "Assessor"])
-
-        # Exibir a tabela de respostas no site
-        st.dataframe(df_respostas)
 else:
-    # Formulário de cliente em outras páginas
-    st.title("Formulário de Interesse em Seguros")
-    st.write(f"Assessor responsável: {assessor}")
+    # Exibir título e opções da página de admin
+    st.sidebar.success("Você está logado como administrador!")
 
-    # Formulário
-    with st.form("formulario"):
-        cliente = st.text_input("Seu nome (cliente):")
-        pergunta = "Você pretende fechar seguro nos próximos 2 anos?"
-        resposta = st.radio(pergunta, ["Sim", "Não"])
-        submit = st.form_submit_button("Enviar")
+    # Exibir respostas como tabela
+    st.title("Admin - Respostas de Interesse em Seguros")
 
-    if submit:
-        if cliente.strip():
-            save_response(cliente, pergunta, resposta, assessor)
-            st.success("Resposta enviada com sucesso!")
-        else:
-            st.error("Por favor, insira seu nome.")
+    conn = sqlite3.connect("respostas.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM respostas")
+    dados = cursor.fetchall()
+    conn.close()
+
+    # Criar um DataFrame com as respostas
+    df_respostas = pd.DataFrame(dados, columns=["ID", "Cliente", "Pergunta", "Resposta", "Assessor"])
+
+    # Exibir a tabela de respostas no site
+    st.dataframe(df_respostas)
+
+# Formulário de cliente em outras páginas
+st.title("Formulário de Interesse em Seguros")
+st.write(f"Assessor responsável: {assessor}")
+
+# Formulário
+with st.form("formulario"):
+    cliente = st.text_input("Seu nome (cliente):")
+    pergunta = "Você pretende fechar seguro nos próximos 2 anos?"
+    resposta = st.radio(pergunta, ["Sim", "Não"])
+    submit = st.form_submit_button("Enviar")
+
+if submit:
+    if cliente.strip():
+        save_response(cliente, pergunta, resposta, assessor)
+        st.success("Resposta enviada com sucesso!")
+    else:
+        st.error("Por favor, insira seu nome.")
