@@ -37,8 +37,12 @@ init_db()
 
 # Capturar os parâmetros da URL
 query_params = st.query_params
-assessor = query_params.get("assessor", ["Desconhecido"])[0]
-is_admin_page = query_params.get("page", [""])[0] == "admin"
+
+# Obter o valor completo de "assessor" como string
+assessor = " ".join(query_params.get("assessor", ["Desconhecido"]))
+
+# Verificar se a página é "admin"
+is_admin_page = " ".join(query_params.get("page", [""])) == "admin"
 
 # Limpar espaços extras no nome do assessor
 assessor = assessor.replace("%20", " ").strip()
