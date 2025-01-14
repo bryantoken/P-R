@@ -2,6 +2,12 @@ import streamlit as st
 import sqlite3
 import pandas as pd
 
+
+st.set_option('deprecation.showfileUploaderEncoding', False)
+st.set_option('deprecation.showWarningOnDirectExecution', False)
+st.set_option('deprecation.showdeprecated', False)  # Ocultar avisos de depreciação
+
+
 # Configuração do Banco de Dados SQLite
 def init_db():
     conn = sqlite3.connect("respostas.db")
