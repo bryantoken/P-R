@@ -1,7 +1,6 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
-import re  # Para facilitar a extração do nome entre aspas
 
 # Configuração do Banco de Dados SQLite
 def init_db():
@@ -36,23 +35,17 @@ def autenticar_usuario(login, senha):
 # Inicializar o banco de dados
 init_db()
 
-# Obter o valor de "assessor" entre aspas
+# Obter o valor de "assessor"
 assessor = st.query_params["assessor"] if "assessor" in st.query_params else "Desconhecido"
 
 # Exibir o banner no topo
 st.image("background.jpeg", use_container_width=True)
 
-# Verificar se o usuário está logado (se a chave 'logged_in' está no session state)
-if 'logged_in' not in st.session_state:
-    st.session_state.logged_in = False  # Inicializando a chave 'logged_in'
-
-# Criar o layout com a coluna esquerda para o botão
-col1, col2 = st.columns([1, 4])  # Dividindo a página em 2 colunas, sendo a primeira mais estreita
-
-with col1:
-    # Criar um botão para abrir a sidebar apenas quando clicado
-    if st.button("Configurações", key="open_sidebar_button"):
-        st.session_state.sidebar_open = True
+# Verificar se o assessor é "admin", caso contrário, a sidebar não será exibida
+if assessor == "admin":
+    st.session_state.sidebar_open = True
+else:
+    st.session_state.sidebar_open = False
 
 # Mostrar painel de login apenas se o usuário abrir a sidebar
 if st.session_state.get("sidebar_open", False):
@@ -100,7 +93,7 @@ with st.form("formulario"):
 
 if submit:
     if cliente.strip():
-        # Salvar no banco com o nome do assessor limpo
+        # Salvar no banco com o nome do assessor
         save_response(cliente, pergunta, resposta, assessor)
         st.success("Resposta enviada com sucesso!")
     else:
