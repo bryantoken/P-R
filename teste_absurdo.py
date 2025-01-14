@@ -47,6 +47,10 @@ if assessor == "admin":
 else:
     st.session_state.sidebar_open = False
 
+# Inicializando o estado de login, se necessário
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
 # Mostrar painel de login apenas se o usuário abrir a sidebar
 if st.session_state.get("sidebar_open", False):
     with st.sidebar:
