@@ -37,11 +37,12 @@ init_db()
 
 # Capturar os parâmetros da URL (atualizado)
 query_params = st.query_params  # Substituído
-assessor = query_params.get("assessor", ["Desconhecido"])[0]
+# Decodificar o nome completo do assessor
+assessor = " ".join(query_params.get("assessor", ["Desconhecido"]))  # Corrigido para capturar o nome completo
 is_admin_page = query_params.get("page", [""])[0] == "admin"
 
 # Exibir o banner no topo
-st.image("background.jpeg", use_container_width=True)  # Substituído
+st.image("background.jpeg", use_container_width=True)
 
 # Painel de login (inicialmente oculto)
 if 'show_login_panel' not in st.session_state:
