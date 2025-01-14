@@ -39,7 +39,7 @@ init_db()
 query_params = st.query_params
 
 # Obter o valor completo de "assessor" como string e tratar corretamente
-assessor = " ".join(query_params.get("assessor", ["Desconhecido"])).replace("%20", " ").strip()
+assessor = " ".join(query_params.get("assessor", ["Desconhecido"])).replace("%20").strip()
 
 # Verificar se a página é "admin" sem adicionar espaços extras
 is_admin_page = query_params.get("page", [""])[0] == "admin"
