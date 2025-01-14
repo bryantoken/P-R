@@ -36,12 +36,12 @@ def autenticar_usuario(login, senha):
 init_db()
 
 # Capturar os parâmetros da URL (atualizado)
-query_params = st.experimental_get_query_params()
+query_params = st.query_params  # Substituído
 assessor = query_params.get("assessor", ["Desconhecido"])[0]
 is_admin_page = query_params.get("page", [""])[0] == "admin"
 
 # Exibir o banner no topo
-st.image("background.jpeg", use_column_width=True)
+st.image("background.jpeg", use_container_width=True)  # Substituído
 
 # Painel de login (inicialmente oculto)
 if 'show_login_panel' not in st.session_state:
