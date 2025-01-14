@@ -37,7 +37,7 @@ def autenticar_usuario(login, senha):
 init_db()
 
 # Capturar os parâmetros da URL
-query_params = st.experimental_get_query_params()  # `st.query_params` já retorna um dicionário
+query_params = st.query_params["assessor"]  # `st.query_params` já retorna um dicionário
 
 # Obter o valor de "assessor" entre aspas
 assessor = query_params.get("assessor", ["Desconhecido"])[0]
