@@ -14,15 +14,19 @@ st.set_page_config(
 
 # Configuração do Banco de Dados MongoDB
 def init_db():
-    mongo_uri = os.getenv("MONGO_URI")  # Lê a string de conexão do .env
+    # Carregar a string de conexão do MongoDB a partir dos segredos do Streamlit
+    mongo_uri = st.secrets["mongo"]["MONGO_URI"]  # Acessando a variável do arquivo secrets.toml
+    
     if not mongo_uri:
-        st.error("A variável MONGO_URI não está definida no arquivo .env.")
+        st.error("A variável MONGO_URI não está definida no arquivo secrets.toml.")
         return None
 
+    # Conectar ao MongoDB
     client = MongoClient(mongo_uri)
     db = client["golden"]  # Nome do banco de dados
     collection = db["seguros_formulario"]  # Nome da coleção
     return collection
+
 
 # Salvar respostas no MongoDB
 def save_response(collection, cliente, respostas, assessor):
@@ -51,7 +55,7 @@ perguntas = [
 # Obter o valor de "assessor"
 assessor = st.query_params["assessor"] if "assessor" in st.query_params else "Desconhecido"
 # Mostrar a imagem de fundo
-st.image("background.jpeg", use_column_width=True)
+st.image("background.jpeg", use_container_width=True)
 
 # Verificar se é administrador
 if assessor.lower() == "admin":
