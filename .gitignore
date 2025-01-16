@@ -1,3 +1,6 @@
 # Ignorar o arquivo .env
 .env
 
+# Ignorar a pasta .streamlit
+.streamlit/
+
